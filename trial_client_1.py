@@ -13,6 +13,7 @@ client_1['Target']      = Y_train_features[trainset_ind_list]
 
 
 client_1['dataset']     = Z_X_Y_train_features[trainset_ind_list]
+
 #client_1['samples'] = len(trainset_ind_list) / args.images
 
 
@@ -22,7 +23,7 @@ class Net(nn.Module):
 
         self.fc1 = nn.Linear(7, 5)
         self.fc2 = nn.Linear(5, 3)
-        self.fc3 = nn.Linear(3, 1)
+        self.fc3 = nn.Linear(3, 6)
 
 
     def forward(self, x):
@@ -35,6 +36,7 @@ class Net(nn.Module):
 torch.manual_seed(args.torch_seed)
 
 client_1['model'] = Net()
+
 client_1['optim'] = optim.SGD(client_1['model'].parameters(), lr=args.lr)
 client_1['model'].train
 
@@ -43,18 +45,15 @@ for epoch in range(1, args.epochs + 1):
     for batch_idx, data in enumerate(client_1['dataset']):
         client_1['optim'].zero_grad()
         output = client_1['model'](data[0:7])
-
-        output = torch.squeeze(output)
-        criterion = nn.BCELoss()
-        loss = criterion(output, data[7])
+        target = data[7]
+        creteria= nn.L1Loss()
+        loss = creteria(output,target)
         loss.backward()
         client_1['optim'].step()
         print('client Train Epoch: {} [{}/{}         ({:.0f}%)]\tLoss: {:.6f}'.format(
-                         epoch, batch_idx , len(client_1['trainset']) ,
-                              100. * batch_idx / len(client_1['trainset']), loss))
-client_1_model = client_1['model']
-#print(client_2_model)
-#global_dict = client_2_model.state_dict()
-#print (client_2_model.state_dict())
+            epoch, batch_idx, len(client_1['trainset']),
+            100. * batch_idx / len(client_1['trainset']), loss))
 
-#torch.save(client_1_model.state_dict(),"fedavg_1.pt")
+client_1_model = client_1['model']
+torch.save(client_1_model.state_dict(),"fedavg_1.pt")
+

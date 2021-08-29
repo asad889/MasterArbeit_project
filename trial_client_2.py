@@ -22,7 +22,7 @@ class Net(nn.Module):
 
         self.fc1 = nn.Linear(7, 5)
         self.fc2 = nn.Linear(5, 3)
-        self.fc3 = nn.Linear(3, 1)
+        self.fc3 = nn.Linear(3, 6)
 
 
     def forward(self, x):
@@ -43,18 +43,14 @@ for epoch in range(1, args.epochs + 1):
     for batch_idx, data in enumerate(client_2['dataset']):
         client_2['optim'].zero_grad()
         output = client_2['model'](data[0:7])
-
-        output = torch.squeeze(output)
-        criterion = nn.BCELoss()
-        loss = criterion(output, data[7])
+        target = data[7]
+        creteria= nn.L1Loss()
+        loss = creteria(output,target)
         loss.backward()
         client_2['optim'].step()
         print('client Train Epoch: {} [{}/{}         ({:.0f}%)]\tLoss: {:.6f}'.format(
                          epoch, batch_idx , len(client_2['trainset']) ,
                               100. * batch_idx / len(client_2['trainset']), loss))
-client_2_model = client_2['model']
-#print(client_2_model)
-#global_dict = client_2_model.state_dict()
-#print (client_2_model.state_dict())
 
-#torch.save(client_1_model.state_dict(),"fedavg_1.pt")
+client_2_model = client_2['model']
+torch.save(client_2_model.state_dict(),"fedavg_2.pt")

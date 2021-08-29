@@ -43,18 +43,13 @@ for epoch in range(1, args.epochs + 1):
     for batch_idx, data in enumerate(client_4['dataset']):
         client_4['optim'].zero_grad()
         output = client_4['model'](data[0:7])
-
-        output = torch.squeeze(output)
-        criterion = nn.BCELoss()
-        loss = criterion(output, data[7])
+        target = data[7]
+        creteria = nn.L1Loss()
+        loss = creteria(output, target)
         loss.backward()
         client_4['optim'].step()
         print('client Train Epoch: {} [{}/{}         ({:.0f}%)]\tLoss: {:.6f}'.format(
                          epoch, batch_idx , len(client_4['trainset']) ,
                               100. * batch_idx / len(client_4['trainset']), loss))
 client_4_model = client_4['model']
-#print(client_2_model)
-#global_dict = client_2_model.state_dict()
-#print (client_2_model.state_dict())
-
-#torch.save(client_1_model.state_dict(),"fedavg_1.pt")
+torch.save(client_4_model.state_dict(),"fedavg_4.pt")
